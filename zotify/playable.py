@@ -1,3 +1,4 @@
+import time
 from math import floor
 from pathlib import Path
 
@@ -94,7 +95,7 @@ class Playable:
             return file_path
 
     def write_audio_stream(
-        self, output: Path | str, p_bar: tqdm = tqdm(disable=True)
+        self, output: Path | str, p_bar: tqdm = tqdm(disable=True), download_real_time: bool = False
     ) -> LocalFile:
         """
         Writes audio stream to file
@@ -109,9 +110,16 @@ class Playable:
         file = f"{output}.ogg"
         with open(file, "wb") as f, p_bar as p_bar:
             chunk = None
+            duration = next((entry.value for entry in self.metadata if entry.name == "duration"), 0)
+            time_start = time.time()
             while chunk != b"":
                 chunk = self.input_stream.stream().read(1024)
                 p_bar.update(f.write(chunk))
+                delta_time = time.time() - time_start
+                expected_time = p_bar.n / p_bar.total * duration / 1000
+                sleep_time = expected_time - delta_time
+                if download_real_time and duration > 0 and sleep_time > 0.1:
+                    time.sleep(expected_time - delta_time)
         return LocalFile(Path(file), AudioFormat.VORBIS)
 
     def get_cover_art(self, size: ImageSize = ImageSize.LARGE) -> bytes:
