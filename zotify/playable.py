@@ -179,6 +179,8 @@ class Track(PlayableContentFeeder.LoadedStream, Playable):
                 album_artists.append(extra_artist_name)
             genres_list = list(set(genres_list + album_extra_genres))
         genres = "; ".join(str(item) for item in set(genres_list))
+        track_title = self.__api.get_localized_track_tilte(self.track)
+
         return [
             MetadataEntry("album", self.album.name),
             MetadataEntry("album_artist", album_artist_name),
@@ -193,8 +195,8 @@ class Track(PlayableContentFeeder.LoadedStream, Playable):
             MetadataEntry("isrc", self.external_id[0].id),
             MetadataEntry("popularity", int(self.popularity * 255) / 100),
             MetadataEntry("track_number", self.number, str(self.number).zfill(2)),
-            MetadataEntry("title", self.name),
-            MetadataEntry("track", self.name),
+            MetadataEntry("title", track_title),
+            MetadataEntry("track", track_title),
             MetadataEntry("year", date.year),
             MetadataEntry("genre", genres),
             MetadataEntry(

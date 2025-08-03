@@ -279,6 +279,13 @@ class ApiClient(LibrespotApiClient):
             self.__localized_artist_names[gid] = (artist_name, artist_genres)
             name = artist_name
         return name, artist_genres
+    
+    def get_localized_track_tilte(self, track_info) -> str:
+        gid = bytes_to_base62(track_info.gid)
+        
+        track_api_info = self.invoke_url(f"tracks/{gid}")
+        return track_api_info.get("name", track_info.name)
+
 
     def __get_token(self) -> str:
         return (
